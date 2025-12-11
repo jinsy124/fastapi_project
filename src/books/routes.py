@@ -31,7 +31,7 @@ async def get_a_book(book_id: int)->dict:
 @book_router.patch("/{book_id}")
 async def update_book(book_id:int,book_update_data:BookUpdateModel)->dict:
     for book in books:
-        if book["id"]==boook_id:
+        if book["id"]==book_id:
             book["title"]=book_update_data.title
             book["author"]=book_update_data.author
             book["language"]=book_update_data.language
