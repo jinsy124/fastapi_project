@@ -6,15 +6,7 @@ from .book_data import books
 from .schemas import Book, BookUpdateModel
 from typing import List 
 
-
-
-
 book_router = APIRouter()
-
-
-
-
-
 
 
 @book_router.get("/",response_model=List[Book])
@@ -37,7 +29,7 @@ async def get_a_book(book_id: int)->dict:
 
 
 @book_router.patch("/{book_id}")
-async def update_book(boook_id:int,book_update_data:BookUpdateModel)->dict:
+async def update_book(book_id:int,book_update_data:BookUpdateModel)->dict:
     for book in books:
         if book["id"]==boook_id:
             book["title"]=book_update_data.title
