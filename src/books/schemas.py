@@ -1,35 +1,36 @@
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, date
 import uuid
-class Book(BaseModel):
-    id:int
-    uid:uuid.UUID
-    title:str
-    author:str
-    language:str
-    published_date:str
-    publisher:str
-    created_at:datetime
-    updated_at:datetime
-    page_count:int
+from typing import Optional
 
+class Book(BaseModel):
+    uid: uuid.UUID
+    title: str
+    author: str
+    language: str
+    published_date: date
+    publisher: str
+    page_count: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+    model_config = {
+        "from_attributes": True
+    }
 
 class BookCreateModel(BaseModel):
-    id: int
     title: str
     author: str
     language: str
     publisher: str
-    published_date: str
+    published_date: date
     page_count: int
 
-from typing import Optional
 class BookUpdateModel(BaseModel):
-    
     title: Optional[str] = None
     author: Optional[str] = None
     language: Optional[str] = None
     publisher: Optional[str] = None
-    published_date: Optional[str] = None
+    published_date: Optional[date] = None
     page_count: Optional[int] = None
-

@@ -1,65 +1,46 @@
-from sqlmodel.ext.asyncio.session import AsyncSession
-from .schemas import BookCeateModel,BookUpdateModel
-from sqlmodel wimport select,desc 
-from .models import Book 
+from typing import List
+from sqlalchemy.future import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-
+from .schemas import Book as BookSchema, BookCreateModel, BookUpdateModel
+from .models import Book as BookModel  # SQLModel DB model
 
 class BookService:
-    async def get_all_books(self,session: AsyncSession):
 
-        statement=select(Book).order_by(desc(Book.created_at))
-
-        result = await session.exec(statement)
-
-        return result.all()
-
-    async def get_book(self,book_uid:str,session: AsyncSession):
-
-        statement=select(Book).where(Book.uid==book_uid)
-
-        result = await session.exec(statement)
-
-        book = result.first()
-        return book if book is not None else None
-
-    async def create_book(self,book_data:BookCeateModel,session: AsyncSession):
-        book_data_dict=book_data.model_dump()
-
-        new_book = Book(
-            **book_data_dict
-        )
+    async def get_all_books(self, session: AsyncSession) -> List[BookSchema]:
+        result = await session.execute(select(BookModel).order_by(BookModel.created_at.desc()))
+        books = result.scalars().all()  # List of SQLModel objects
+        # Convert each SQLModel object to Pydantic
+        return [BookSchema.from_orm(book) for book in books]
         
-        session.add(new_book)
 
+    async def get_book(self, book_uid, session: AsyncSession):
+        result = await session.get(BookModel, book_uid)
+        if result:
+            return BookSchema.from_orm(result)
+        return None
+
+    async def create_book(self, book_data: BookCreateModel, session: AsyncSession):
+        book = BookModel(**book_data.dict())
+        session.add(book)
         await session.commit()
+        await session.refresh(book)
+        return BookSchema.from_orm(book)
 
-        return new_book
-
-    async def update_book(self,update_data:BookUpdateModel,session: AsyncSession):
-        
-        book_to_update = self.get_book(book_uid,session)
-        if book_to_update is not None:
-            update_data_dict = update_data.model_dump()
-            for k,v in update_data_dict.items():
-                setattr(book_to_update,k,v)
-
-            await session.commit()
-
-            return book_to_update
-        else:
+    async def update_book(self, book_uid, book_update_data: BookUpdateModel, session: AsyncSession):
+        book = await session.get(BookModel, book_uid)
+        if not book:
             return None
+        for key, value in book_update_data.dict(exclude_unset=True).items():
+            setattr(book, key, value)
+        await session.commit()
+        await session.refresh(book)
+        return BookSchema.from_orm(book)
 
-
-
-    async def delete_book(self,book_uid:str,session: AsyncSession):
-        book_to_delete = self.get_book(book_uid,session)
-
-        if book_to_delete is not None:
-            await session.delete(book_to_delete)
-            await session.commit()
-        else:
-            return None
-
-
-
+    async def delete_book(self, book_uid, session: AsyncSession):
+        book = await session.get(BookModel, book_uid)
+        if not book:
+            return False
+        await session.delete(book)
+        await session.commit()
+        return True
