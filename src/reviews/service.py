@@ -43,12 +43,13 @@ class ReviewService:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="User not found"
                 )
-            new_review.user = user
-            new_review.books = book
+            new_review.user_uid = user.uid
+            new_review.book_uid = book.uid
             session.add(new_review)
             await session.commit()
             return new_review
-
+        except HTTPException:
+            raise
         except Exception as e:
             logging.exception(e)
             raise HTTPException(

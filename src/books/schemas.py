@@ -1,7 +1,10 @@
 from pydantic import BaseModel
 from datetime import datetime, date
+from src.reviews.schemas import ReviewModel
 import uuid
-from typing import Optional
+from typing import Optional,List
+
+
 
 class Book(BaseModel):
     uid: uuid.UUID
@@ -13,12 +16,18 @@ class Book(BaseModel):
     page_count: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-
+    
     model_config = {
         "from_attributes": True
     }
 
+
+class BookDetailModel(Book):
+    reviews:List[ReviewModel] = []
+        
+
+
+    
 class BookCreateModel(BaseModel):
     title: str
     author: str
@@ -34,3 +43,7 @@ class BookUpdateModel(BaseModel):
     publisher: Optional[str] = None
     published_date: Optional[date] = None
     page_count: Optional[int] = None
+    
+
+
+    

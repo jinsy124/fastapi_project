@@ -9,7 +9,9 @@ from src.db.main import get_session
 from .service import UserService
 from typing import List
 from src.db.models import User
-
+from src.errors import (
+    InvalidToken
+)
 
 
 user_service = UserService()
@@ -25,10 +27,7 @@ class TokenBearer(HTTPBearer):
         token_data = decode_token(token)
 
         if not self.token_valid(token):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="invalid or expired token"
-            )
+            raise InvalidToken()
 
         if await token_in_blocklist(token_data['jti']):
             raise HTTPException(

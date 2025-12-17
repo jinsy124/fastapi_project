@@ -20,10 +20,8 @@ class BookService:
         return [BookSchema.from_orm(book) for book in books]
         
     async def get_book(self, book_uid, session: AsyncSession):
-        result = await session.get(BookModel, book_uid)
-        if result:
-            return BookSchema.from_orm(result)
-        return None
+        return await session.get(BookModel, book_uid)
+       
 
     async def create_book(self, book_data: BookCreateModel,user_uid:str, session: AsyncSession):
         book_data_dict = book_data.model_dump()

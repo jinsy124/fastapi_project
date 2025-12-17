@@ -3,7 +3,7 @@ from typing import List
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .schemas import Book, BookCreateModel, BookUpdateModel
+from .schemas import Book, BookCreateModel, BookUpdateModel,BookDetailModel
 from src.books.service import BookService
 from src.db.main import get_session
 from src.auth.dependencies import AccessTokenBearer,RoleChecker
@@ -46,7 +46,7 @@ async def create_a_book(
     return new_book
     
 
-@book_router.get("/{book_uid}", response_model=Book,dependencies=[role_checker])
+@book_router.get("/{book_uid}", response_model=BookDetailModel,dependencies=[role_checker])
 async def get_a_book(
     book_uid: uuid.UUID, session: AsyncSession = Depends(get_session),
     token_details:dict=Depends(access_token_bearer),
