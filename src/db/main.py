@@ -6,7 +6,7 @@ from src.config import Config
 # 1. Create async engine correctly
 engine = create_async_engine(
     Config.DATABASE_URL,
-    echo=True
+    
 )
 
 # 2. Create sessionmaker correctly
