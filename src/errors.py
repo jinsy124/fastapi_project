@@ -44,4 +44,9 @@ class UserNotFound(BooklyException):
     pass
 
 def create_exception_handler(status_code:int,initial_detail:Any) ->Callable[[Request,Exception],JSONResponse]:
-    pass
+    async def exception_handler(request:Request,exc:BooklyException):
+        return JSONResponse(
+            content=initial_detail,
+            status_code=status_code
+        )
+    return exception_handler
