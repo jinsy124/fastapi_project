@@ -1,5 +1,5 @@
-from fastapi import APIRouter,Depends,status
-from .schemas import UserCreateModel,UserModel, UserLoginModel,UserBooksModel
+from fastapi import APIRouter,Depends,status,BackgroundTasks
+from .schemas import UserCreateModel,UserModel, UserLoginModel,UserBooksModel,EmailModel
 from .service import UserService 
 from src.db.main import get_session
 from fastapi.exceptions import HTTPException
@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from .dependencies import RefreshTokenBearer,AccessTokenBearer,get_current_user,RoleChecker
 from src.db.redis import add_jti_to_blocklist
 from src.errors import UserAlreadyExists,UserNotFound,InvalidCreadentials,InvalidToken
-
+from src.celery_tasks import send_email_task
 
 auth_router = APIRouter()
 user_service = UserService()
@@ -19,12 +19,17 @@ role_checker = RoleChecker(['admin','user'])
 
 REFRESH_TOKEN_EXPIRY = 2
 
+
+
+
+
+
 @auth_router.post(
     '/signup',
     response_model=UserModel,
     status_code=status.HTTP_201_CREATED
     )
-async def create_user_Account(user_data: UserCreateModel, session:AsyncSession= Depends(get_session)):
+async def create_user_Account(user_data: UserCreateModel,bg_tasks:BackgroundTasks, session:AsyncSession= Depends(get_session)):
     email = user_data.email
 
     user_exists = await user_service.user_exists(email, session)
@@ -33,6 +38,12 @@ async def create_user_Account(user_data: UserCreateModel, session:AsyncSession= 
         raise UserAlreadyExists()
 
     new_user = await user_service.create_user(user_data, session)
+    emails=[email]
+    subject="Verify Your Email"
+    html = f"""
+    <h1>Welcome</h1>
+    """
+    send_email.delay(emails, subject, html)
     return new_user
 
 @auth_router.post('/login')
@@ -94,7 +105,16 @@ async def get_current_user(
     user = Depends(get_current_user),_:bool = Depends(role_checker)
     ):
     return user
+@auth_router.post("/send_mail")
+async def send_mail(emails: EmailModel):
+    recipients = emails.addresses
+    subject = "Welcome to our app"
+    body = "<h1>Welcome to the app</h1>"
 
+    # Call Celery task
+    send_email_task.delay(recipients, subject, body)
+
+    return {"message": "Email request received, sending in background"}
 
 @auth_router.get('/logout')
 async def revoke_token(token_details:dict=Depends(AccessTokenBearer())):
