@@ -1,4 +1,4 @@
-from pydantic import BaseModel,Field
+from pydantic import BaseModel,Field,ConfigDict
 import uuid
 from datetime import datetime
 from src.reviews.schemas import ReviewModel
@@ -25,14 +25,13 @@ class UserModel(BaseModel):
     updated_at: datetime
 
 class UserBooksModel(UserModel):
-    
+    model_config = ConfigDict(from_attributes=True)
     books:List[Book]
     reviews: List[ReviewModel]
 
 
 
-    class Config:
-        from_attributes = True
+   
 
 class UserLoginModel(BaseModel):
     email: str = Field(max_length=40)
