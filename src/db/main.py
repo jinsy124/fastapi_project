@@ -2,6 +2,8 @@ from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from src.config import Config
+from src.db.models import User, Book, Review  # add all your models here
+
 
 # 1. Create async engine correctly
 engine = create_async_engine(
@@ -16,10 +18,7 @@ async_session = sessionmaker(
     expire_on_commit=False
 )
 
-# 3. Initialize DB
-async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.create_all)
+
 
 # 4. Dependency for routes
 async def get_session() -> AsyncSession:

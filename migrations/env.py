@@ -1,15 +1,16 @@
 import asyncio
+import sys
+import os
 from logging.config import fileConfig
 
+# ✅ MUST BE FIRST
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from src.db.models import User
-
-
-from src.db.models import Book
+from src.db import models
 from sqlmodel import SQLModel
 from src.config import Config
 

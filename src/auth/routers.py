@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from .dependencies import RefreshTokenBearer,AccessTokenBearer,get_current_user,RoleChecker
 from src.db.redis import add_jti_to_blocklist
 from src.errors import UserAlreadyExists,UserNotFound,InvalidCreadentials,InvalidToken
-from src.celery_tasks import send_email_task
+
 
 auth_router = APIRouter()
 user_service = UserService()
@@ -38,12 +38,12 @@ async def create_user_Account(user_data: UserCreateModel,bg_tasks:BackgroundTask
         raise UserAlreadyExists()
 
     new_user = await user_service.create_user(user_data, session)
-    emails=[email]
-    subject="Verify Your Email"
-    html = f"""
-    <h1>Welcome</h1>
-    """
-    send_email.delay(emails, subject, html)
+    #emails=[email]
+    #subject="Verify Your Email"
+    #html = f"""
+    #<h1>Welcome</h1>
+    #"""
+    #send_email.delay(emails, subject, html)
     return new_user
 
 @auth_router.post('/login')

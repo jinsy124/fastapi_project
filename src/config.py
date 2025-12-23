@@ -1,22 +1,26 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
-    DATABASE_URL : str
-    JWT_SECRET : str
-    JWT_ALGORITHM : str
-    REDIS_URL : str = "redis://localhost:6379/0"
-    
+    DATABASE_URL: str
+    JWT_SECRET: str = "dev-secret"
+    JWT_ALGORITHM: str = "HS256"
 
+    # ✅ Docker-safe Redis URL
+    REDIS_URL: str = "redis://redis:6379/0"
 
-    model_config=SettingsConfigDict(
+    model_config = SettingsConfigDict(
         env_file=".env",
-        extra="ignore"
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
 
-   
+# ✅ Single shared settings instance
 Config = Settings()
 
+# Optional (used by Celery if needed later)
 broker_url = Config.REDIS_URL
 result_backend = Config.REDIS_URL
+
 
